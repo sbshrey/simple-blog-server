@@ -1,0 +1,26 @@
+{
+  "name": "simple-blog-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx nodemon src/index.js",
+    "build": "babel src --out-dir dist",
+    "serve": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "autocannon": "^7.15.0",
+    "babel-node": "^0.0.1-security",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.4",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
+  }
+}
