@@ -2,14 +2,8 @@ const express = require('express');
 const router = express.Router();
 const {LRUCache} = require('lru-cache');
 
-let posts = [
-    {
-        'id': 1,
-        'title': 'Hello',
-        'content': 'Hello World!'
-    }
-];
-let postIdCounter = 2;
+let posts = [];
+let postIdCounter = 1;
 
 
 
