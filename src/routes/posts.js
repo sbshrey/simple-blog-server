@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const {LRUCache} = require('lru-cache');
 
 let posts = [
     {
@@ -10,7 +11,18 @@ let posts = [
 ];
 let postIdCounter = 2;
 
-const cache = {};
+
+
+// const cache = {};
+// Initialize LRU cache with a maximum of 100 items
+const options = {
+    max: 500,
+    // how long to live in ms
+    ttl: 1000 * 60 * 5,
+}
+
+const cache = new LRUCache(options)
+
 
 // POST /posts - Create a new blog post
 router.post('/', (req, res) => {
@@ -21,6 +33,10 @@ router.post('/', (req, res) => {
 
     const newPost = { id: postIdCounter++, title, content };
     posts.push(newPost);
+
+    // Invalidate cache when a new post is added
+    cache.clear();
+    
     res.status(201).json(newPost);
 });
 
@@ -36,17 +52,22 @@ router.get('/:id', (req, res) => {
 // GET /posts - List all posts (with pagination)
 router.get('/', (req, res) => {
     const { page = 1, limit = 10 } = req.query;
-    // caching to optimize
-    const cacheKey = `posts_${page}_${limit}`;
-
-    if (cache[cacheKey]) {
-        return res.json(cache[cacheKey]);
-    }
-
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
+    // caching to optimize
+    const cacheKey = `posts_${page}_${limit}`;
+
+    // Check if the result is already in the cache
+    if (cache.has(cacheKey)) {
+        return res.json(cache.get(cacheKey));
+    }
+
     const paginatedPosts = posts.slice(startIndex, endIndex);
+
+    // Cache the result
+    cache.set(cacheKey, paginatedPosts);
+
     res.json(paginatedPosts);
 });
 
@@ -61,6 +82,9 @@ router.put('/:id', (req, res) => {
     if (title) post.title = title;
     if (content) post.content = content;
 
+    // Invalidate cache when a post is updated
+    cache.clear();
+
     res.json(post);
 });
 
@@ -72,6 +96,10 @@ router.delete('/:id', (req, res) => {
     }
 
     posts.splice(postIndex, 1);
+
+    // Invalidate cache when a post is updated
+    cache.clear();
+
     res.status(204).send();
 });
 
